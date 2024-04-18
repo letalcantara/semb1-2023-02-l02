@@ -88,25 +88,20 @@ void reset_handler(void)
 {
   uint32_t i; 
 
-  /* Copia a secao .data para a RAM */
-   
-  uint32_t size = (uint32_t)&_edata - (uint32_t)&_sdata;
-  uint8_t *pDst = (uint8_t*)&_sdata;                      /* SRAM */
-  uint8_t *pSrc = (uint8_t*)&_la_data;                    /* FLASH */
-  
-  for(i = 0; i < size; i++)
-  {
-    *pDst++ = *pSrc++;
+  void reset_handler(void)
+{
+  uint32_t *pSrc, *pDst, *pEnd;
+
+  /* Copy .data section from FLASH to RAM */
+  pSrc = &_la_data;
+  pEnd = &_edata;
+  for (pDst = &_sdata; pDst < pEnd; ++pDst, ++pSrc) {
+    *pDst = *pSrc;
   }
 
-  /* Preenche a secao .bss com zero */
-
-  size = (uint32_t)&_ebss - (uint32_t)&_sbss;
-  pDst = (uint8_t*)&_sbss;
-  for(i = 0 ; i < size; i++)
-  {
-    *pDst++ = 0;
-  }
+  /* Zero fill the .bss section */
+  for (pDst = &_sbss; pDst < &_ebss; ++pDst) {
+    *pDst = 0;
 
   /* Chama a funcao main() */
 
