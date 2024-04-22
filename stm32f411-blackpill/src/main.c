@@ -153,14 +153,34 @@ int main(int argc, char *argv[])
     reg |= GPIO_MODER_INPUT << GPIO_MODER_SHIFT(0);
     *pGPIOA_MODER = reg;
 
+
+  uint32_t last_button_state = 1; // Estado do botão na última iteração (1 = solto, 0 = pressionado)
+  uint32_t current_button_state;  // Estado do botão na iteração atual
+
   while(1)
+  {
+    // Lê o estado atual do botão
+    current_button_state = (*pGPIOA_IDR & (1 << 0));
+
+    // Verifica se houve uma transição de estado do botão
+    if (current_button_state != last_button_state)
     {
-        if ((*pGPIOA_IDR & (1 << 0)) != 0) {  // Verifica se o botão está pressionado
-            *pGPIOC_BSRR = GPIO_BSRR_RESET(13);  // Liga o LED
-        } else {
-            *pGPIOC_BSRR = GPIO_BSRR_SET(13);    // Desliga o LED
-        }
+      // Inverte o estado do LED (PC13) quando o botão é pressionado
+      if (current_button_state == 0) // Botão pressionado
+      {
+        // Inverte o estado do LED
+        *pGPIOC_BSRR = GPIO_BSRR_RESET(13); // Liga o LED
+      }
+      else // Botão solto
+      {
+        // Inverte o estado do LED
+        *pGPIOC_BSRR = GPIO_BSRR_SET(13); // Desliga o LED
+      }
+
+      // Atualiza o estado do botão na última iteração
+      last_button_state = current_button_state;
     }
+  }
 
 
   /* Nunca deveria chegar aqui */
